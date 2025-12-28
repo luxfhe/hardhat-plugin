@@ -41,7 +41,7 @@ The plugin automatically adds network configurations for:
 
 ### Mock Contracts
 
-This plugin uses [cofhe-mock-contracts](https://github.com/FhenixProtocol/cofhe-mock-contracts) to provide on-chain simulations of the CoFHE system. These mock contracts enable development and testing without requiring the actual off-chain FHE computation engine.
+This plugin uses [cofhe-mock-contracts](https://github.com/LuxFHEProtocol/cofhe-mock-contracts) to provide on-chain simulations of the CoFHE system. These mock contracts enable development and testing without requiring the actual off-chain FHE computation engine.
 
 The mock contracts include:
 

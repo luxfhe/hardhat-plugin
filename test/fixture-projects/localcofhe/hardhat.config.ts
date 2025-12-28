@@ -13,7 +13,7 @@ const config: HardhatUserConfig = {
   },
   defaultNetwork: "localcofhe",
   networks: {
-    localfhenix: {
+    localluxfhe: {
       url: "http://localhost:42069",
       accounts: {
         mnemonic:

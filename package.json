@@ -2,7 +2,7 @@
   "name": "cofhe-hardhat-plugin",
   "version": "0.3.1",
   "description": "Hardhat TypeScript plugin boilerplate",
-  "repository": "github:FhenixProtocol/cofhe-hardhat-plugin",
+  "repository": "github:luxfheProtocol/cofhe-hardhat-plugin",
   "author": "Fhe Labs",
   "license": "MIT",
   "main": "dist/src/index.js",
@@ -13,7 +13,7 @@
     "hardhat",
     "hardhat-plugin",
     "fhe",
-    "fhenix",
+    "luxfhe",
     "cofhe"
   ],
   "scripts": {
@@ -54,8 +54,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@fhenixprotocol/cofhe-contracts": "0.0.13",
-    "@fhenixprotocol/cofhe-mock-contracts": "^0.3.0",
+    "@luxfhe/cofhe-contracts": "0.0.13",
+    "@luxfhe/cofhe-mock-contracts": "^0.3.0",
     "@openzeppelin/contracts": "^5.0.0",
     "@openzeppelin/contracts-upgradeable": "^5.0.0",
     "axios": "^1.6.5",
