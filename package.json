@@ -1,9 +1,9 @@
 {
-  "name": "cofhe-hardhat-plugin",
-  "version": "0.3.1",
-  "description": "Hardhat TypeScript plugin boilerplate",
-  "repository": "github:luxfheProtocol/cofhe-hardhat-plugin",
-  "author": "Fhe Labs",
+  "name": "@luxfhe/hardhat-plugin",
+  "version": "0.5.1",
+  "description": "LuxFHE Hardhat plugin for FHE smart contract development",
+  "repository": "github:luxfi/luxfhe",
+  "author": "Lux Industries Inc",
   "license": "MIT",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
@@ -14,7 +14,7 @@
     "hardhat-plugin",
     "fhe",
     "luxfhe",
-    "cofhe"
+    "tfhe"
   ],
   "scripts": {
     "lint": "eslint --config ./.eslintrc.json --ignore-path ./.eslintignore ./**/*.ts",
@@ -30,8 +30,10 @@
     "README.md"
   ],
   "devDependencies": {
+    "@luxfhe/sdk": "^0.5.1",
     "@nomicfoundation/hardhat-chai-matchers": "^2.0.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
+    "@nomicfoundation/hardhat-foundry": "^1.1.3",
     "@types/chai": "^4.1.7",
     "@types/eslint": "^8",
     "@types/fs-extra": "^11.0.4",
@@ -41,10 +43,10 @@
     "@typescript-eslint/eslint-plugin": "latest",
     "@typescript-eslint/parser": "latest",
     "chai": "^4.2.0",
-    "cofhejs": "^0.3.1",
     "eslint": "^8.26.0",
     "eslint-config-prettier": "^8.5.0",
     "eslint-plugin-prettier": "^4.2.1",
+    "ethers": "^6.16.0",
     "fs-extra": "^11.2.0",
     "hardhat": "^2.11.0",
     "mocha": "^10.4.0",
@@ -54,8 +56,8 @@
     "typescript": "^5.3.3"
   },
   "dependencies": {
-    "@luxfhe/cofhe-contracts": "0.0.13",
-    "@luxfhe/cofhe-mock-contracts": "^0.3.0",
+    "@luxfhe/contracts": "^0.5.1",
+    "@luxfhe/foundry-mocks": "^0.5.0",
     "@openzeppelin/contracts": "^5.0.0",
     "@openzeppelin/contracts-upgradeable": "^5.0.0",
     "axios": "^1.6.5",
@@ -63,8 +65,8 @@
     "fast-glob": "^3.3.2"
   },
   "peerDependencies": {
+    "@luxfhe/sdk": "^0.5.0",
     "@nomicfoundation/hardhat-ethers": "^3.0.5",
-    "cofhejs": "^0.3.0",
     "ethers": "^6.10.0",
     "hardhat": "^2.11.0"
   }

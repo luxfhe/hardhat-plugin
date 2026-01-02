@@ -1,11 +1,11 @@
 import chalk from "chalk";
 import { extendConfig, extendEnvironment, task, types } from "hardhat/config";
 
-import { localcofheFundAccount } from "./common";
+import { localLuxFHEFundAccount } from "./common";
 import {
-  TASK_COFHE_MOCKS_DEPLOY,
-  TASK_COFHE_MOCKS_SET_LOG_OPS,
-  TASK_COFHE_USE_FAUCET,
+  TASK_LUXFHE_MOCKS_DEPLOY,
+  TASK_LUXFHE_MOCKS_SET_LOG_OPS,
+  TASK_LUXFHE_USE_FAUCET,
 } from "./const";
 import { TASK_TEST, TASK_NODE } from "hardhat/builtin-tasks/task-names";
 import { deployMocks, DeployMocksArgs } from "./deploy-mocks";
@@ -14,11 +14,11 @@ import { mock_expectPlaintext } from "./mockUtils";
 import { mock_getPlaintext } from "./mockUtils";
 import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
-  cofhejs_initializeWithHardhatSigner,
+  luxfhe_initializeWithHardhatSigner,
   HHSignerInitializationParams,
-  isPermittedCofheEnvironment,
+  isPermittedLuxFHEEnvironment,
 } from "./networkUtils";
-import { Permit, Result } from "cofhejs/node";
+import { Permit, Result } from "@luxfhe/sdk/node";
 import {
   expectResultError,
   expectResultPartialValue,
@@ -27,12 +27,12 @@ import {
 } from "./result";
 
 /**
- * Configuration interface for the CoFHE Hardhat plugin.
+ * Configuration interface for the LuxFHE Hardhat plugin.
  * Allows users to configure mock logging and gas warning settings.
  */
 declare module "hardhat/types/config" {
   interface HardhatUserConfig {
-    cofhe?: {
+    luxfhe?: {
       /** Whether to log mock operations (default: true) */
       logMocks?: boolean;
       /** Whether to show gas usage warnings for mock operations (default: true) */
@@ -41,7 +41,7 @@ declare module "hardhat/types/config" {
   }
 
   interface HardhatConfig {
-    cofhe: {
+    luxfhe: {
       logMocks: boolean;
       gasWarning: boolean;
     };
@@ -49,13 +49,13 @@ declare module "hardhat/types/config" {
 }
 
 extendConfig((config, userConfig) => {
-  // Allow users to override the localcofhe network config
-  if (userConfig.networks && userConfig.networks.localcofhe) {
+  // Allow users to override the localluxfhe network config
+  if (userConfig.networks && userConfig.networks.localluxfhe) {
     return;
   }
 
   // Default config
-  config.networks.localcofhe = {
+  config.networks.localluxfhe = {
     gas: "auto",
     gasMultiplier: 1.2,
     gasPrice: "auto",
@@ -102,10 +102,10 @@ extendConfig((config, userConfig) => {
     };
   }
 
-  // Add cofhe config
-  config.cofhe = {
-    logMocks: userConfig.cofhe?.logMocks ?? true,
-    gasWarning: userConfig.cofhe?.gasWarning ?? true,
+  // Add luxfhe config
+  config.luxfhe = {
+    logMocks: userConfig.luxfhe?.logMocks ?? true,
+    gasWarning: userConfig.luxfhe?.gasWarning ?? true,
   };
 });
 
@@ -113,15 +113,15 @@ type UseFaucetArgs = {
   address?: string;
 };
 
-task(TASK_COFHE_USE_FAUCET, "Fund an account from the funder")
+task(TASK_LUXFHE_USE_FAUCET, "Fund an account from the funder")
   .addOptionalParam("address", "Address to fund", undefined, types.string)
   .setAction(async ({ address }: UseFaucetArgs, hre) => {
     const { network } = hre;
     const { name: networkName } = network;
 
-    if (networkName !== "localcofhe") {
+    if (networkName !== "localluxfhe") {
       console.info(
-        chalk.yellow(`Programmatic faucet only supported for localcofhe`),
+        chalk.yellow(`Programmatic faucet only supported for localluxfhe`),
       );
       return;
     }
@@ -134,10 +134,10 @@ task(TASK_COFHE_USE_FAUCET, "Fund an account from the funder")
     console.info(chalk.green(`Getting funds from faucet for ${address}`));
 
     try {
-      await localcofheFundAccount(hre, address);
+      await localLuxFHEFundAccount(hre, address);
     } catch (e) {
       console.info(
-        chalk.red(`failed to get funds from localcofhe for ${address}: ${e}`),
+        chalk.red(`failed to get funds from localluxfhe for ${address}: ${e}`),
       );
     }
   });
@@ -145,7 +145,7 @@ task(TASK_COFHE_USE_FAUCET, "Fund an account from the funder")
 // DEPLOY TASKS
 
 task(
-  TASK_COFHE_MOCKS_DEPLOY,
+  TASK_LUXFHE_MOCKS_DEPLOY,
   "Deploys the mock contracts on the Hardhat network",
 )
   .addOptionalParam(
@@ -163,7 +163,7 @@ task(
   .setAction(async ({ deployTestBed, silent }: DeployMocksArgs, hre) => {
     await deployMocks(hre, {
       deployTestBed: deployTestBed ?? true,
-      gasWarning: hre.config.cofhe.gasWarning ?? true,
+      gasWarning: hre.config.luxfhe.gasWarning ?? true,
       silent: silent ?? false,
     });
   });
@@ -172,7 +172,7 @@ task(TASK_TEST, "Deploy mock contracts on hardhat").setAction(
   async ({}, hre, runSuper) => {
     await deployMocks(hre, {
       deployTestBed: true,
-      gasWarning: hre.config.cofhe.gasWarning ?? true,
+      gasWarning: hre.config.luxfhe.gasWarning ?? true,
     });
     return runSuper();
   },
@@ -182,7 +182,7 @@ task(TASK_NODE, "Deploy mock contracts on hardhat").setAction(
   async ({}, hre, runSuper) => {
     await deployMocks(hre, {
       deployTestBed: true,
-      gasWarning: hre.config.cofhe.gasWarning ?? true,
+      gasWarning: hre.config.luxfhe.gasWarning ?? true,
     });
     return runSuper();
   },
@@ -190,7 +190,7 @@ task(TASK_NODE, "Deploy mock contracts on hardhat").setAction(
 
 // SET LOG OPS
 
-task(TASK_COFHE_MOCKS_SET_LOG_OPS, "Set logging for the Mock CoFHE contracts")
+task(TASK_LUXFHE_MOCKS_SET_LOG_OPS, "Set logging for the Mock LuxFHE contracts")
   .addParam("enable", "Whether to enable logging", false, types.boolean)
   .setAction(async ({ enable }, hre) => {
     await mock_setLoggingEnabled(hre, enable);
@@ -206,32 +206,32 @@ export * from "./mock-logs";
 export * from "./deploy-mocks";
 
 /**
- * Runtime environment extensions for the CoFHE Hardhat plugin.
- * Provides access to CoFHE initialization, environment checks, and mock utilities.
+ * Runtime environment extensions for the LuxFHE Hardhat plugin.
+ * Provides access to LuxFHE initialization, environment checks, and mock utilities.
  */
 declare module "hardhat/types/runtime" {
   export interface HardhatRuntimeEnvironment {
-    cofhe: {
+    luxfhe: {
       /**
-       * Initialize `cofhejs` using a Hardhat signer
+       * Initialize `luxfhejs` using a Hardhat signer
        * @param {HardhatEthersSigner} signer - The Hardhat ethers signer to use
-       * @param {HHSignerInitializationParams} params - Optional initialization parameters to be passed to `cofhejs`
-       * @returns {Promise<Result<Permit | undefined>>} The initialized CoFHE instance
+       * @param {HHSignerInitializationParams} params - Optional initialization parameters to be passed to `luxfhejs`
+       * @returns {Promise<Result<Permit | undefined>>} The initialized LuxFHE instance
        */
       initializeWithHardhatSigner: (
         signer: HardhatEthersSigner,
         params?: HHSignerInitializationParams,
-      ) => Promise<Result<Permit | undefined>>;
+      ) => Promise<Permit | undefined>;
 
       /**
-       * Check if a CoFHE environment is permitted for the current network
+       * Check if a LuxFHE environment is permitted for the current network
        * @param {string} env - The environment name to check. Must be "MOCK" | "LOCAL" | "TESTNET" | "MAINNET"
        * @returns {boolean} Whether the environment is permitted
        */
       isPermittedEnvironment: (env: string) => boolean;
 
       /**
-       * Assert that a Result type (see cofhejs) returned from a function is successful and return its value
+       * Assert that a Result type (see luxfhejs) returned from a function is successful and return its value
        * @param {Result<T>} result - The Result to check
        * @returns {T} The inner data of the Result (non null)
        */
@@ -240,7 +240,7 @@ declare module "hardhat/types/runtime" {
       ) => Promise<T>;
 
       /**
-       * Assert that a Result type (see cofhejs) contains an error matching the partial string
+       * Assert that a Result type (see luxfhejs) contains an error matching the partial string
        * @param {Result<T>} result - The Result to check
        * @param {string} errorPartial - The partial error string to match
        */
@@ -250,7 +250,7 @@ declare module "hardhat/types/runtime" {
       ) => Promise<void>;
 
       /**
-       * Assert that a Result type (see cofhejs) contains a specific value
+       * Assert that a Result type (see luxfhejs) contains a specific value
        * @param {Result<T>} result - The Result to check
        * @param {T} value - The inner data of the Result (non null)
        */
@@ -260,7 +260,7 @@ declare module "hardhat/types/runtime" {
       ) => Promise<T>;
 
       /**
-       * Assert that a Result type (see cofhejs) contains a value matching the partial object
+       * Assert that a Result type (see luxfhejs) contains a value matching the partial object
        * @param {Result<T>} result - The Result to check
        * @param {Partial<T>} partial - The partial object to match against
        * @returns {T} The inner data of the Result (non null)
@@ -274,14 +274,14 @@ declare module "hardhat/types/runtime" {
         /**
          * **[MOCKS ONLY]**
          *
-         * Execute a block of code with cofhe mock contracts logging enabled.
+         * Execute a block of code with LuxFHE mock contracts logging enabled.
          *
          * _(If logging only a function, we recommend passing the function name as the closureName (ex "counter.increment()"))_
          *
          * Expected output:
          * ```
          * ┌──────────────────┬──────────────────────────────────────────────────
-         * │ [COFHE-MOCKS]    │ "counter.increment()" logs:
+         * │ [LUXFHE-MOCKS]   │ "counter.increment()" logs:
          * ├──────────────────┴──────────────────────────────────────────────────
          * ├ FHE.add          | euint32(4473..3424)[0] + euint32(1157..3648)[1]  =>  euint32(1106..1872)[1]
          * ├ FHE.allowThis    | euint32(1106..1872)[1] -> 0x663f..6602
@@ -299,7 +299,7 @@ declare module "hardhat/types/runtime" {
         /**
          * **[MOCKS ONLY]**
          *
-         * Enable logging from cofhe mock contracts
+         * Enable logging from LuxFHE mock contracts
          * @param {string} closureName - Optional name of the code block to enable logging for
          */
         enableLogs: (closureName?: string) => Promise<void>;
@@ -307,14 +307,14 @@ declare module "hardhat/types/runtime" {
         /**
          * **[MOCKS ONLY]**
          *
-         * Disable logging from cofhe mock contracts
+         * Disable logging from LuxFHE mock contracts
          */
         disableLogs: () => Promise<void>;
 
         /**
          * **[MOCKS ONLY]**
          *
-         * Deploy the cofhe mock contracts (normally this is done automatically)
+         * Deploy the LuxFHE mock contracts (normally this is done automatically)
          * @param {DeployMocksArgs} options - Deployment options
          */
         deployMocks: (options: DeployMocksArgs) => Promise<void>;
@@ -345,19 +345,19 @@ declare module "hardhat/types/runtime" {
 }
 
 extendConfig((config) => {
-  config.cofhe = config.cofhe || {};
+  config.luxfhe = config.luxfhe || {};
 });
 
 extendEnvironment((hre) => {
-  hre.cofhe = {
+  hre.luxfhe = {
     initializeWithHardhatSigner: async (
       signer: HardhatEthersSigner,
       params?: HHSignerInitializationParams,
     ) => {
-      return cofhejs_initializeWithHardhatSigner(hre, signer, params);
+      return luxfhe_initializeWithHardhatSigner(hre, signer, params);
     },
     isPermittedEnvironment: (env: string) => {
-      return isPermittedCofheEnvironment(hre, env);
+      return isPermittedLuxFHEEnvironment(hre, env);
     },
     expectResultSuccess: async <T>(result: Result<T> | Promise<Result<T>>) => {
       const awaitedResult = await result;

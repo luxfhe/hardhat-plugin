@@ -11,7 +11,7 @@ const config: HardhatUserConfig = {
       evmVersion: "cancun",
     },
   },
-  defaultNetwork: "localcofhe",
+  defaultNetwork: "localfhe",
   networks: {
     localluxfhe: {
       url: "http://localhost:42069",

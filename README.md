@@ -5,11 +5,11 @@ A Hardhat plugin for Fully Homomorphic Encryption (FHE) development with CoFHE.
 ## Installation
 
 ```bash
-npm install cofhe-hardhat-plugin
+npm install fhe-hardhat-plugin
 # or
-yarn add cofhe-hardhat-plugin
+yarn add fhe-hardhat-plugin
 # or
-pnpm add cofhe-hardhat-plugin
+pnpm add fhe-hardhat-plugin
 ```
 
 ## Configuration
@@ -18,13 +18,13 @@ Add the plugin to your Hardhat config:
 
 ```javascript
 // hardhat.config.js or hardhat.config.ts
-require("cofhe-hardhat-plugin");
+require("fhe-hardhat-plugin");
 // or if using TypeScript
-import "cofhe-hardhat-plugin";
+import "fhe-hardhat-plugin";
 
 module.exports = {
   // ... other config
-  cofhe: {
+  fhe: {
     logMocks: true, // Optional: Set to true to log mock operations
   },
   // Network configuration is automatically added by the plugin
@@ -41,7 +41,7 @@ The plugin automatically adds network configurations for:
 
 ### Mock Contracts
 
-This plugin uses [cofhe-mock-contracts](https://github.com/LuxFHEProtocol/cofhe-mock-contracts) to provide on-chain simulations of the CoFHE system. These mock contracts enable development and testing without requiring the actual off-chain FHE computation engine.
+This plugin uses [fhe-mock-contracts](https://github.com/LuxFHEProtocol/fhe-mock-contracts) to provide on-chain simulations of the CoFHE system. These mock contracts enable development and testing without requiring the actual off-chain FHE computation engine.
 
 The mock contracts include:
 
@@ -83,15 +83,15 @@ The plugin exports several utility functions for working with mock contracts:
 
 ```typescript
 // Get plaintext value from a ciphertext hash
-import { mock_getPlaintext } from "cofhe-hardhat-plugin";
+import { mock_getPlaintext } from "fhe-hardhat-plugin";
 const plaintext = await mock_getPlaintext(provider, ctHash);
 
 // Check if a plaintext exists for a ciphertext hash
-import { mock_getPlaintextExists } from "cofhe-hardhat-plugin";
+import { mock_getPlaintextExists } from "fhe-hardhat-plugin";
 const exists = await mock_getPlaintextExists(provider, ctHash);
 
 // Test assertion for plaintext values
-import { mock_expectPlaintext } from "cofhe-hardhat-plugin";
+import { mock_expectPlaintext } from "fhe-hardhat-plugin";
 await mock_expectPlaintext(provider, ctHash, expectedValue);
 ```
 
@@ -99,16 +99,16 @@ await mock_expectPlaintext(provider, ctHash, expectedValue);
 
 ```typescript
 // Get the CoFHE environment based on network name
-import { getCofheEnvironmentFromNetwork } from "cofhe-hardhat-plugin";
-const environment = getCofheEnvironmentFromNetwork(networkName);
+import { getFHEEnvironmentFromNetwork } from "fhe-hardhat-plugin";
+const environment = getFHEEnvironmentFromNetwork(networkName);
 
 // Check if a CoFHE environment is permitted for a given network
-import { isPermittedCofheEnvironment } from "cofhe-hardhat-plugin";
-const isPermitted = isPermittedCofheEnvironment(hre, environmentName);
+import { isPermittedFHEEnvironment } from "fhe-hardhat-plugin";
+const isPermitted = isPermittedFHEEnvironment(hre, environmentName);
 
 // Initialize CoFHEjs with a Hardhat signer
-import { cofhejs_initializeWithHardhatSigner } from "cofhe-hardhat-plugin";
-await cofhejs_initializeWithHardhatSigner(signer, options);
+import { fhe_initializeWithHardhatSigner } from "fhe-hardhat-plugin";
+await fhe_initializeWithHardhatSigner(signer, options);
 ```
 
 ## Usage in Tests
@@ -117,7 +117,7 @@ The plugin automatically deploys mock contracts when running tests:
 
 ```typescript
 import { expect } from "chai";
-import { mock_expectPlaintext } from "cofhe-hardhat-plugin";
+import { mock_expectPlaintext } from "fhe-hardhat-plugin";
 
 describe("My FHE Contract", function() {
   it("should store encrypted value correctly", async function() {

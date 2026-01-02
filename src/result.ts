@@ -1,4 +1,4 @@
-import { Result } from "cofhejs/node";
+import { Result } from "@luxfhe/sdk/node";
 import { expect } from "chai";
 
 export const expectResultError = <T>(

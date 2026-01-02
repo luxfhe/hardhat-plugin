@@ -1,91 +1,91 @@
 import util from "util";
 import { JsonRpcProvider } from "ethers";
 import { exec } from "child_process";
-
-// TODO: Need to update this to use the localcofhe containers.
-// - architect 2025-03-27
-const TEST_ENDPOINT_URL = process.env.TEST_ENDPOINT || "http://localhost:8545";
+import path from "path";
 
 const execPromise = util.promisify(exec);
-const CONTAINER_NAME = "fhenixjs-test-env";
 
-async function runDockerContainerAsync() {
-  const imageName = "ghcr.io/fhenixprotocol/localfhenix:v0.3.2";
-
-  const ports = "-p 8545:8547 -p 5000:3000";
-
-  const removePrevious = `docker kill ${CONTAINER_NAME}`;
-
-  const command = `docker run --rm --env FHEOS_SECURITY_ZONES=2 --name ${CONTAINER_NAME} ${ports} -d ${imageName}`;
-
-  try {
-    try {
-      await execPromise(removePrevious);
-    } catch (_) {}
-    const result = await execPromise(command);
-    // console.log(result.stdout);
-    // console.error(result.stderr);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to start docker container");
-  }
-}
-
-async function killDockerContainerAsync() {
-  const removePrevious = `docker kill ${CONTAINER_NAME}`;
-
-  try {
-    await execPromise(removePrevious);
-  } catch (error) {
-    console.error(error);
-    throw new Error("Failed to remove docker container");
-  }
-}
+// LuxFHE Docker Compose - Uses ~/work/lux/fhe/compose.yml
+const FHE_COMPOSE_DIR = process.env.LUX_FHE_DIR || path.join(process.env.HOME || "~", "work/lux/fhe");
+const FHE_SERVER_URL = process.env.FHE_SERVER_URL || "http://localhost:8448";
 
 async function sleep(ms) {
   return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
-async function waitForChainToStart(url) {
-  // eslint-disable-next-line no-constant-condition
-  while (true) {
+async function waitForFHEServer(url, timeoutMs = 30000) {
+  const startTime = Date.now();
+  const healthUrl = `${url}/health`;
+
+  while (Date.now() - startTime < timeoutMs) {
     try {
-      const client = new JsonRpcProvider(url);
-      console.log(`connecting to ${url}...`);
-      const networkId = await client.getNetwork();
-      return Number(networkId.chainId);
-    } catch (e) {
-      console.log(`client not ready`);
+      const response = await fetch(healthUrl);
+      if (response.ok) {
+        return true;
+      }
+    } catch (_) {
+      // Server not ready yet
     }
-    await sleep(250);
+    await sleep(500);
+  }
+  return false;
+}
+
+async function startFHEServer() {
+  try {
+    console.log("Starting LuxFHE server from", FHE_COMPOSE_DIR);
+
+    // Stop any existing containers first
+    try {
+      await execPromise(`docker compose -f ${FHE_COMPOSE_DIR}/compose.yml down`);
+    } catch (_) {}
+
+    // Start only the server service
+    await execPromise(`docker compose -f ${FHE_COMPOSE_DIR}/compose.yml up -d server`);
+
+    return true;
+  } catch (error) {
+    console.error("Failed to start FHE server:", error.message);
+    return false;
+  }
+}
+
+async function stopFHEServer() {
+  try {
+    await execPromise(`docker compose -f ${FHE_COMPOSE_DIR}/compose.yml down`);
+  } catch (error) {
+    console.error("Failed to stop FHE server:", error.message);
   }
 }
 
 export async function mochaGlobalSetup() {
-  // TODO: This is currently disabled because we don't have a localcofhe container
-  // Once the localcofhe container is ready, we can replace this with the localcofhe startup
-  // Hopefully: `localCofheStart(wait: true)`
-  // - architect 2025-03-31
-  //
-  // if (process.env.SKIP_LOCAL_ENV === "true") {
-  //   return;
-  // }
-  // runDockerContainerAsync();
-  // console.log("\nWaiting for Fhenix to start...");
-  // await waitForChainToStart(TEST_ENDPOINT_URL);
-  // console.log("Fhenix is running!");
+  if (process.env.SKIP_LOCAL_ENV === "true") {
+    console.log("Skipping local FHE environment setup (SKIP_LOCAL_ENV=true)");
+    return;
+  }
+
+  console.log("\nStarting LuxFHE server...");
+
+  const started = await startFHEServer();
+  if (!started) {
+    console.warn("Could not start FHE server - tests may fail");
+    return;
+  }
+
+  const healthy = await waitForFHEServer(FHE_SERVER_URL, 60000);
+  if (healthy) {
+    console.log("LuxFHE server is running!");
+  } else {
+    console.warn("FHE server health check failed - tests may fail");
+  }
 }
 
-// this is a cjs because jest sucks at typescript
-
 export async function mochaGlobalTeardown() {
-  // TODO: Add localcofhe teardown
-  // - architect 2025-03-31
-  //
-  // if (process.env.SKIP_LOCAL_ENV === "true") {
-  //   return;
-  // }
-  // console.log("\nWaiting for Fhenix to stop...");
-  // await killDockerContainerAsync();
-  // console.log("Stopped test container. Goodbye!");
+  if (process.env.SKIP_LOCAL_ENV === "true") {
+    return;
+  }
+
+  console.log("\nStopping LuxFHE server...");
+  await stopFHEServer();
+  console.log("LuxFHE server stopped. Goodbye!");
 }

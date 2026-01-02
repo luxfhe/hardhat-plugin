@@ -1,6 +1,7 @@
 // We load the plugin here.
 import { HardhatUserConfig } from "hardhat/types";
 import "@nomicfoundation/hardhat-ethers";
+import "@nomicfoundation/hardhat-foundry";
 
 import "../../../src";
 

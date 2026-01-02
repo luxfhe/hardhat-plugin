@@ -8,7 +8,7 @@ import { HardhatRuntimeEnvironment } from 'hardhat/types'
  * @param amount Amount to send in ETH (default: 10)
  * @returns Transaction receipt or null if failed
  */
-export async function localcofheFundAccount(
+export async function localLuxFHEFundAccount(
   hre: HardhatRuntimeEnvironment,
   toAddress: string,
   amount: string = "10"
@@ -64,14 +64,14 @@ export async function localcofheFundAccount(
  * @param walletAddress Address of the wallet to check and potentially fund
  * @returns Promise that resolves when the funding operation completes (if needed)
  */
-export async function localcofheFundWalletIfNeeded(hre: HardhatRuntimeEnvironment, walletAddress: string) {
+export async function localLuxFHEFundWalletIfNeeded(hre: HardhatRuntimeEnvironment, walletAddress: string) {
   // Check wallet balance and fund if needed
   const walletBalance = await hre.ethers.provider.getBalance(walletAddress)
   console.log(`Wallet balance: ${hre.ethers.formatEther(walletBalance)} ETH`);
 
   if (walletBalance < hre.ethers.parseEther("1")) {
     console.log(`Wallet balance is less than 1 ETH. Funding ${walletAddress}...`);
-    const receipt = await localcofheFundAccount(hre, walletAddress);
+    const receipt = await localLuxFHEFundAccount(hre, walletAddress);
     if (receipt) {
       const newBalance = await hre.ethers.provider.getBalance(walletAddress)
       console.log(`Wallet new balance: ${hre.ethers.formatEther(newBalance)} ETH`);

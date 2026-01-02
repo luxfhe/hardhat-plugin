@@ -1,34 +1,34 @@
 // tslint:disable-next-line no-implicit-dependencies
 import { expect } from "chai";
-import { TASK_COFHE_MOCKS_DEPLOY, TASK_COFHE_USE_FAUCET } from "../src/const";
+import { TASK_LUXFHE_MOCKS_DEPLOY, TASK_LUXFHE_USE_FAUCET } from "../src/const";
 import { useEnvironment } from "./helpers";
 import {
   QUERY_DECRYPTER_ADDRESS,
-  TASK_MANAGER_ADDRESS,
+  FHE_NETWORK_ADDRESS,
   ZK_VERIFIER_ADDRESS,
 } from "../src/addresses";
 
-describe("Cofhe Hardhat Plugin", function () {
-  describe("Localcofhe Faucet command", async function () {
-    useEnvironment("localcofhe");
+describe("LuxFHE Hardhat Plugin", function () {
+  describe("LocalLuxFHE Faucet command", async function () {
+    useEnvironment("localluxfhe");
     it("checks that the faucet works", async function () {
-      await this.hre.run(TASK_COFHE_USE_FAUCET);
+      await this.hre.run(TASK_LUXFHE_USE_FAUCET);
     });
   });
 
   describe("Hardhat Mocks", async () => {
     useEnvironment("hardhat");
     it("checks that the mocks are deployed", async function () {
-      await this.hre.run(TASK_COFHE_MOCKS_DEPLOY);
+      await this.hre.run(TASK_LUXFHE_MOCKS_DEPLOY);
 
-      const taskManager = await this.hre.ethers.getContractAt(
-        "TaskManager",
-        TASK_MANAGER_ADDRESS,
+      const fheNetwork = await this.hre.ethers.getContractAt(
+        "MockNetwork",
+        FHE_NETWORK_ADDRESS,
       );
-      const tmExists = await taskManager.exists();
-      expect(tmExists).to.equal(true);
+      const fheNetworkExists = await fheNetwork.exists();
+      expect(fheNetworkExists).to.equal(true);
 
-      const aclAddress = await taskManager.acl();
+      const aclAddress = await fheNetwork.acl();
 
       const acl = await this.hre.ethers.getContractAt("ACL", aclAddress);
       const aclExists = await acl.exists();

@@ -1,4 +1,4 @@
-import { TASK_MANAGER_ADDRESS, ZK_VERIFIER_ADDRESS } from "./addresses";
+import { FHE_NETWORK_ADDRESS, ZK_VERIFIER_ADDRESS } from "./addresses";
 import { expect } from "chai";
 import { ethers } from "ethers";
 import { HardhatEthersProvider } from "@nomicfoundation/hardhat-ethers/internal/hardhat-ethers-provider";
@@ -30,15 +30,15 @@ export const mock_getPlaintext = async (
   // Skip with log if called on a non-testnet chain
   if (await mock_checkIsTestnet(mock_getPlaintext.name, provider)) return;
 
-  // Connect to MockTaskManager
-  const taskManager = new ethers.Contract(
-    TASK_MANAGER_ADDRESS,
+  // Connect to MockFHENetwork (contract still named TaskManager in Solidity)
+  const fheNetwork = new ethers.Contract(
+    FHE_NETWORK_ADDRESS,
     ["function mockStorage(uint256) view returns (uint256)"],
     provider,
   );
 
   // Fetch the plaintext
-  const plaintext = await taskManager.mockStorage(ctHash);
+  const plaintext = await fheNetwork.mockStorage(ctHash);
 
   return plaintext;
 };
@@ -50,15 +50,15 @@ export const mock_getPlaintextExists = async (
   // Skip with log if called on a non-testnet chain
   if (await mock_checkIsTestnet(mock_getPlaintextExists.name, provider)) return;
 
-  // Connect to MockTaskManager
-  const taskManager = new ethers.Contract(
-    TASK_MANAGER_ADDRESS,
+  // Connect to MockFHENetwork (contract still named TaskManager in Solidity)
+  const fheNetwork = new ethers.Contract(
+    FHE_NETWORK_ADDRESS,
     ["function inMockStorage(uint256) view returns (bool)"],
     provider,
   );
 
   // Fetch the plaintext exists
-  const plaintextExists = await taskManager.inMockStorage(ctHash);
+  const plaintextExists = await fheNetwork.inMockStorage(ctHash);
 
   return plaintextExists;
 };

@@ -16,7 +16,7 @@ export const checkNetworkAndSkip = async (hre: HardhatRuntimeEnvironment) => {
   const isHardhat = network === "hardhat";
   if (!isHardhat)
     logSuccess(
-      `cofhe-hardhat-plugin - deploy mocks - skipped on non-hardhat network ${network}`,
+      `luxfhe-hardhat-plugin - deploy mocks - skipped on non-hardhat network ${network}`,
       0,
     );
   return isHardhat;

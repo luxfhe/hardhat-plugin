@@ -2,11 +2,11 @@ import { expect } from "chai";
 import { useEnvironment } from "./helpers";
 import {
   QUERY_DECRYPTER_ADDRESS,
-  TASK_MANAGER_ADDRESS,
+  FHE_NETWORK_ADDRESS,
   TEST_BED_ADDRESS,
   ZK_VERIFIER_ADDRESS,
 } from "../src/addresses";
-import { TASK_COFHE_MOCKS_DEPLOY } from "../src/const";
+import { TASK_LUXFHE_MOCKS_DEPLOY } from "../src/const";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 
 describe("Deploy Mocks Task", function () {
@@ -16,17 +16,17 @@ describe("Deploy Mocks Task", function () {
   useEnvironment("hardhat");
 
   it("should deploy mock contracts", async function () {
-    await this.hre.run(TASK_COFHE_MOCKS_DEPLOY);
+    await this.hre.run(TASK_LUXFHE_MOCKS_DEPLOY);
 
-    const taskManager = await this.hre.ethers.getContractAt(
-      "TaskManager",
-      TASK_MANAGER_ADDRESS,
+    const fheNetwork = await this.hre.ethers.getContractAt(
+      "MockNetwork",
+      FHE_NETWORK_ADDRESS,
     );
-    expect(await taskManager.exists()).to.equal(true);
+    expect(await fheNetwork.exists()).to.equal(true);
 
     const acl = await this.hre.ethers.getContractAt(
       "ACL",
-      await taskManager.acl(),
+      await fheNetwork.acl(),
     );
     expect(await acl.exists()).to.equal(true);
 
@@ -44,41 +44,37 @@ describe("Deploy Mocks Task", function () {
   });
 
   it("should deploy mocks with test bed", async function () {
-    await this.hre.run(TASK_COFHE_MOCKS_DEPLOY, {
+    await this.hre.run(TASK_LUXFHE_MOCKS_DEPLOY, {
       deployTestBed: true,
     });
 
-    // Verify contracts are deployed
-    const taskManager = await this.hre.ethers.getContractAt(
-      "TaskManager",
-      TASK_MANAGER_ADDRESS,
+    const fheNetwork = await this.hre.ethers.getContractAt(
+      "MockNetwork",
+      FHE_NETWORK_ADDRESS,
     );
-    expect(await taskManager.exists()).to.equal(true);
+    expect(await fheNetwork.exists()).to.equal(true);
 
-    // Verify test bed is deployed
     const testBedBytecode = await getTestBedBytecode(this.hre);
     expect(testBedBytecode.length).to.be.greaterThan(2);
 
     const testBed = await this.hre.ethers.getContractAt(
-      "TestBed",
+      "FHETest",
       TEST_BED_ADDRESS,
     );
     expect(await testBed.exists()).to.equal(true);
   });
 
   it("should deploy mocks without test bed", async function () {
-    await this.hre.run(TASK_COFHE_MOCKS_DEPLOY, {
+    await this.hre.run(TASK_LUXFHE_MOCKS_DEPLOY, {
       deployTestBed: false,
     });
 
-    // Verify mock contracts are deployed
-    const taskManager = await this.hre.ethers.getContractAt(
-      "TaskManager",
-      TASK_MANAGER_ADDRESS,
+    const fheNetwork = await this.hre.ethers.getContractAt(
+      "MockNetwork",
+      FHE_NETWORK_ADDRESS,
     );
-    expect(await taskManager.exists()).to.equal(true);
+    expect(await fheNetwork.exists()).to.equal(true);
 
-    // Verify test bed is not deployed
     const testBedBytecode = await getTestBedBytecode(this.hre);
     expect(testBedBytecode).to.equal("0x");
   });

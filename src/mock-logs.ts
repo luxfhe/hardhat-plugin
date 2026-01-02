@@ -1,34 +1,34 @@
 import { HardhatRuntimeEnvironment } from "hardhat/types";
-import { TASK_MANAGER_ADDRESS } from "./addresses";
+import { FHE_NETWORK_ADDRESS } from "./addresses";
 import chalk from "chalk";
 
-const getDeployedMockTaskManager = async (hre: HardhatRuntimeEnvironment) => {
-  // Fetch the deployed MockTaskManager
-  const taskManager = await hre.ethers.getContractAt(
+const getDeployedMockFHENetwork = async (hre: HardhatRuntimeEnvironment) => {
+  // Fetch the deployed MockFHENetwork (contract still named TaskManager in Solidity)
+  const fheNetwork = await hre.ethers.getContractAt(
     "TaskManager",
-    TASK_MANAGER_ADDRESS,
+    FHE_NETWORK_ADDRESS,
   );
 
-  return taskManager;
+  return fheNetwork;
 };
 
 const getLoggingEnabled = async (hre: HardhatRuntimeEnvironment) => {
-  const taskManager = await getDeployedMockTaskManager(hre);
-  return await taskManager.logOps();
+  const fheNetwork = await getDeployedMockFHENetwork(hre);
+  return await fheNetwork.logOps();
 };
 
 const setLoggingEnabled = async (
   hre: HardhatRuntimeEnvironment,
   enabled: boolean,
 ) => {
-  const taskManager = await getDeployedMockTaskManager(hre);
-  await taskManager.setLogOps(enabled);
+  const fheNetwork = await getDeployedMockFHENetwork(hre);
+  await fheNetwork.setLogOps(enabled);
 };
 
 // prettier-ignore
 const printLogsEnabledMessage = (closureMessage: string) => {
   console.log("┌──────────────────┬──────────────────────────────────────────────────");
-  console.log(`│ [COFHE-MOCKS]    │ ${closureMessage}`);
+  console.log(`│ [LUXFHE-MOCKS]   │ ${closureMessage}`);
   console.log("├──────────────────┴──────────────────────────────────────────────────");
 };
 

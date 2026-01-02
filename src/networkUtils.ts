@@ -3,18 +3,18 @@ import { HardhatEthersSigner } from "@nomicfoundation/hardhat-ethers/signers";
 import {
   AbstractProvider,
   AbstractSigner,
-  cofhejs,
+  luxfhe,
   Environment,
   InitializationParams,
-} from "cofhejs/node";
+} from "@luxfhe/sdk/node";
 import { TypedDataField } from "ethers";
 import { MOCK_ZK_VERIFIER_SIGNER_ADDRESS } from "./const";
 
-export const getCofheEnvironmentFromNetwork = (
+export const getLuxFHEEnvironmentFromNetwork = (
   network: string,
 ): Environment => {
   switch (network) {
-    case "localcofhe":
+    case "localluxfhe":
       return "LOCAL";
     case "hardhat":
     case "localhost":
@@ -27,13 +27,13 @@ export const getCofheEnvironmentFromNetwork = (
   }
 };
 
-export const isPermittedCofheEnvironment = (
+export const isPermittedLuxFHEEnvironment = (
   hre: HardhatRuntimeEnvironment,
   env: string,
 ) => {
   switch (env) {
     case "LOCAL":
-      return ["localcofhe"].includes(hre.network.name);
+      return ["localluxfhe"].includes(hre.network.name);
     case "MOCK":
       return ["hardhat", "localhost"].includes(hre.network.name);
     case "TESTNET":
@@ -55,7 +55,7 @@ export type HHSignerInitializationParams = Omit<
   environment?: Environment;
 };
 
-const hhSignerToCofhejsProvider = (
+const hhSignerToLuxFHEProvider = (
   signer: HardhatEthersSigner,
 ): AbstractProvider => {
   const provider: AbstractProvider = {
@@ -63,7 +63,7 @@ const hhSignerToCofhejsProvider = (
       try {
         return signer.provider.call(...args);
       } catch (e) {
-        throw new Error(`cofhejs initializeWithHHSigner :: call :: ${e}`);
+        throw new Error(`luxfhe initializeWithHHSigner :: call :: ${e}`);
       }
     },
     getChainId: async () =>
@@ -72,14 +72,14 @@ const hhSignerToCofhejsProvider = (
       try {
         return signer.provider.send(...args);
       } catch (e) {
-        throw new Error(`cofhejs initializeWithHHSigner :: send :: ${e}`);
+        throw new Error(`luxfhe initializeWithHHSigner :: send :: ${e}`);
       }
     },
   };
   return provider;
 };
 
-const hhSignerToCofhejsSigner = (
+const hhSignerToLuxFHESigner = (
   signer: HardhatEthersSigner,
   provider: AbstractProvider,
 ): AbstractSigner => {
@@ -98,7 +98,7 @@ const hhSignerToCofhejsSigner = (
         return tx.hash;
       } catch (e) {
         throw new Error(
-          `cofhejs initializeWithHHSigner :: sendTransaction :: ${e}`,
+          `luxfhe initializeWithHHSigner :: sendTransaction :: ${e}`,
         );
       }
     },
@@ -106,24 +106,24 @@ const hhSignerToCofhejsSigner = (
   return abstractSigner;
 };
 
-export const cofhejs_initializeWithHardhatSigner = async (
+export const luxfhe_initializeWithHardhatSigner = async (
   hre: HardhatRuntimeEnvironment,
   signer: HardhatEthersSigner,
   params?: HHSignerInitializationParams,
 ) => {
-  const abstractProvider = hhSignerToCofhejsProvider(signer);
-  const abstractSigner = hhSignerToCofhejsSigner(signer, abstractProvider);
+  const abstractProvider = hhSignerToLuxFHEProvider(signer);
+  const abstractSigner = hhSignerToLuxFHESigner(signer, abstractProvider);
 
   const zkvHhSigner = await hre.ethers.getImpersonatedSigner(
     MOCK_ZK_VERIFIER_SIGNER_ADDRESS,
   );
-  const zkvSigner = hhSignerToCofhejsSigner(zkvHhSigner, abstractProvider);
+  const zkvSigner = hhSignerToLuxFHESigner(zkvHhSigner, abstractProvider);
 
-  return cofhejs.initialize({
+  return luxfhe.initialize({
     ...(params ?? {}),
     environment:
       params?.environment ??
-      getCofheEnvironmentFromNetwork((await signer.provider.getNetwork()).name),
+      getLuxFHEEnvironmentFromNetwork((await signer.provider.getNetwork()).name),
     provider: abstractProvider,
     signer: abstractSigner,
     mockConfig: {

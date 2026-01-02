@@ -9,7 +9,7 @@ import {
 } from "./utils";
 import { HardhatRuntimeEnvironment } from "hardhat/types";
 import {
-  TASK_MANAGER_ADDRESS,
+  FHE_NETWORK_ADDRESS,
   ZK_VERIFIER_ADDRESS,
   QUERY_DECRYPTER_ADDRESS,
   TEST_BED_ADDRESS,
@@ -21,32 +21,32 @@ import { MOCK_ZK_VERIFIER_SIGNER_ADDRESS } from "./const";
 
 // Deploy
 
-const deployMockTaskManager = async (hre: HardhatRuntimeEnvironment) => {
+const deployMockFHENetwork = async (hre: HardhatRuntimeEnvironment) => {
   const [signer] = await hre.ethers.getSigners();
 
-  // Deploy MockTaskManager
-  const TaskManagerArtifact = await hre.artifacts.readArtifact("TaskManager");
+  // Deploy MockFHENetwork (contract still named TaskManager in Solidity)
+  const FHENetworkArtifact = await hre.artifacts.readArtifact("TaskManager");
   await hardhatSetCode(
     hre,
-    TASK_MANAGER_ADDRESS,
-    TaskManagerArtifact.deployedBytecode,
+    FHE_NETWORK_ADDRESS,
+    FHENetworkArtifact.deployedBytecode,
   );
-  const taskManager = await hre.ethers.getContractAt(
+  const fheNetwork = await hre.ethers.getContractAt(
     "TaskManager",
-    TASK_MANAGER_ADDRESS,
+    FHE_NETWORK_ADDRESS,
   );
 
-  // Initialize MockTaskManager
-  const initTx = await taskManager.initialize(signer.address);
+  // Initialize MockFHENetwork
+  const initTx = await fheNetwork.initialize(signer.address);
   await initTx.wait();
 
-  // Check if MockTaskManager exists
-  const tmExists = await taskManager.exists();
-  if (!tmExists) {
-    throw new Error("MockTaskManager does not exist");
+  // Check if MockFHENetwork exists
+  const networkExists = await fheNetwork.exists();
+  if (!networkExists) {
+    throw new Error("MockFHENetwork does not exist");
   }
 
-  return taskManager;
+  return fheNetwork;
 };
 
 const deployMockACL = async (hre: HardhatRuntimeEnvironment) => {
@@ -108,7 +108,7 @@ const deployMockQueryDecrypter = async (
 
   // Initialize MockQueryDecrypter
   const initTx = await queryDecrypter.initialize(
-    TASK_MANAGER_ADDRESS,
+    FHE_NETWORK_ADDRESS,
     await acl.getAddress(),
   );
   await initTx.wait();
@@ -145,8 +145,8 @@ const fundZkVerifierSigner = async (hre: HardhatRuntimeEnvironment) => {
 
 // Initializations
 
-const setTaskManagerACL = async (taskManager: Contract, acl: Contract) => {
-  const setAclTx = await taskManager.setACLContract(await acl.getAddress());
+const setFHENetworkACL = async (fheNetwork: Contract, acl: Contract) => {
+  const setAclTx = await fheNetwork.setACLContract(await acl.getAddress());
   await setAclTx.wait();
 };
 
@@ -191,7 +191,7 @@ export const deployMocks = async (
 
   // Log start message
   logEmptyIfNoisy();
-  logSuccessIfNoisy(chalk.bold("cofhe-hardhat-plugin :: deploy mocks"), 0);
+  logSuccessIfNoisy(chalk.bold("luxfhe-hardhat-plugin :: deploy mocks"), 0);
   logEmptyIfNoisy();
 
   // Compile mock contracts
@@ -200,14 +200,14 @@ export const deployMocks = async (
   logSuccessIfNoisy("Mock contracts compiled", 1);
 
   // Deploy mock contracts
-  const taskManager = await deployMockTaskManager(hre);
-  logDeploymentIfNoisy("MockTaskManager", await taskManager.getAddress());
+  const fheNetwork = await deployMockFHENetwork(hre);
+  logDeploymentIfNoisy("MockFHENetwork", await fheNetwork.getAddress());
 
   const acl = await deployMockACL(hre);
   logDeploymentIfNoisy("MockACL", await acl.getAddress());
 
-  await setTaskManagerACL(taskManager, acl);
-  logSuccessIfNoisy("ACL address set in TaskManager", 2);
+  await setFHENetworkACL(fheNetwork, acl);
+  logSuccessIfNoisy("ACL address set in FHENetwork", 2);
 
   await fundZkVerifierSigner(hre);
   logSuccessIfNoisy(
@@ -235,7 +235,7 @@ export const deployMocks = async (
   // Log success message
   logEmptyIfNoisy();
   logSuccessIfNoisy(
-    chalk.bold("cofhe-hardhat-plugin :: mocks deployed successfully"),
+    chalk.bold("luxfhe-hardhat-plugin :: mocks deployed successfully"),
     0,
   );
 
@@ -243,7 +243,7 @@ export const deployMocks = async (
   if (options.gasWarning) {
     logEmptyIfNoisy();
     logWarningIfNoisy(
-      "When using mocks, FHE operations (eg FHE.add / FHE.mul) report a higher gas price due to additional on-chain mocking logic. Deploy your contracts on a testnet chain to check the true gas costs.\n(Disable this warning by setting 'cofhejs.gasWarning' to false in your hardhat config",
+      "When using mocks, FHE operations (eg FHE.add / FHE.mul) report a higher gas price due to additional on-chain mocking logic. Deploy your contracts on a testnet chain to check the true gas costs.\n(Disable this warning by setting 'luxfhe.gasWarning' to false in your hardhat config",
       0,
     );
   }
